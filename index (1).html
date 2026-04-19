@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ParkZone">
+<title>ParkZone Shortcut</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #111;
+    --card: #1c1c1c;
+    --border: #2e2e2e;
+    --accent: #d4f53c;
+    --text: #f2f2f2;
+    --muted: #666;
+    --danger: #ff4d4d;
+  }
+
+  html, body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    overscroll-behavior: none;
+  }
+
+  body {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  header {
+    padding: 28px 24px 16px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .logo-text span { color: var(--accent); }
+  .header-sub { font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
+
+  main { flex: 1; padding: 24px 20px; }
+
+  .section-label {
+    font-size: 10px; color: var(--muted);
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .plates { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+
+  .plate-wrap { position: relative; animation: fadeUp 0.3s ease both; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .plate-btn {
+    width: 100%;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 60px 22px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .plate-btn:active { transform: scale(0.97); border-color: var(--accent); background: #222; }
+
+  .plate-num { font-size: 22px; font-weight: 500; letter-spacing: 0.06em; }
+  .plate-arrow { font-size: 12px; color: var(--muted); }
+
+  .del-btn {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    width: 36px; height: 36px;
+    background: none; border: none; color: var(--muted);
+    font-size: 20px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; border-radius: 50%;
+  }
+  .del-btn:active { color: var(--danger); }
+
+  .empty-state {
+    text-align: center; padding: 32px 20px;
+    border: 1.5px dashed var(--border); border-radius: 16px;
+    color: var(--muted); font-size: 13px; margin-bottom: 28px; line-height: 1.8;
+  }
+
+  .add-row { display: flex; gap: 10px; margin-bottom: 28px; }
+
+  input {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: 'DM Mono', monospace; font-size: 16px;
+    padding: 16px; outline: none; -webkit-appearance: none;
+    transition: border-color 0.15s;
+  }
+  input:focus { border-color: var(--accent); }
+  input::placeholder { color: var(--muted); }
+
+  .add-row input { flex: 1; min-width: 0; text-transform: uppercase; }
+
+  .add-btn {
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-size: 24px; padding: 0 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .add-btn:active { border-color: var(--accent); }
+
+  .email-section { margin-bottom: 8px; }
+  .email-section input { width: 100%; font-size: 14px; letter-spacing: 0; }
+
+  .toast {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 32px);
+    left: 50%; transform: translateX(-50%) translateY(120px);
+    background: var(--accent); color: #111;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    padding: 14px 28px; border-radius: 100px;
+    white-space: nowrap; transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none; z-index: 999; max-width: 90vw; text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .info {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 18px; margin-top: 24px;
+  }
+  .info p { font-size: 12px; color: var(--muted); line-height: 1.8; }
+  .info strong { color: var(--accent); font-weight: 500; }
+
+  /* Loading overlay */
+  .overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(17,17,17,0.85);
+    z-index: 100;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 16px;
+  }
+  .overlay.show { display: flex; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .overlay-text { font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-text">Park<span>Zone</span></div>
+  <div class="header-sub">Shortcut</div>
+</header>
+
+<main>
+  <p class="section-label">Nummerplader</p>
+  <div class="plates" id="plates"></div>
+
+  <div class="add-row">
+    <input type="text" id="newPlate" placeholder="AB12345" maxlength="10"
+      autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" />
+    <button class="add-btn" onclick="addPlate()">+</button>
+  </div>
+
+  <p class="section-label">Email</p>
+  <div class="email-section">
+    <input type="email" id="emailInput" placeholder="din@email.dk" autocomplete="email" oninput="saveEmail()" />
+  </div>
+
+  <div class="info">
+    <p>Tryk en plade → ParkZone åbner → felterne udfyldes automatisk.<br>
+    <strong>Tillad pop-ups</strong> hvis Chrome spørger.</p>
+  </div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-text">Åbner ParkZone...</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PARKZONE_URL = 'https://validation.parkzone.dk/Home/Index/AA255226588D8F0D13FE2F6DA25B09A7A1EA28C01937001F9044AA5B77BC77150FEBD9513968F952D86E3B57BE966583236D3D097B73C70F1252A19227A3C218FD9E5A8A101884723DA8C1E9EFB750F01DA64DC4EDDE82F78F48229FEFCC73FD';
+
+let plates = JSON.parse(localStorage.getItem('pz_plates') || '[]');
+
+function savePlates() { localStorage.setItem('pz_plates', JSON.stringify(plates)); }
+function saveEmail() { localStorage.setItem('pz_email', document.getElementById('emailInput').value); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function render() {
+  const container = document.getElementById('plates');
+  container.innerHTML = '';
+  if (plates.length === 0) {
+    container.innerHTML = '<div class="empty-state">Ingen nummerplader endnu.<br>Tilføj en herunder.</div>';
+    return;
+  }
+  plates.forEach((p, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'plate-wrap';
+    wrap.style.animationDelay = (i * 0.06) + 's';
+
+    const btn = document.createElement('button');
+    btn.className = 'plate-btn';
+    btn.innerHTML = `<span class="plate-num">${p}</span><span class="plate-arrow">åbn →</span>`;
+    btn.onclick = () => selectPlate(p);
+
+    const del = document.createElement('button');
+    del.className = 'del-btn';
+    del.textContent = '×';
+    del.onclick = e => { e.stopPropagation(); removePlate(i); };
+
+    wrap.appendChild(btn);
+    wrap.appendChild(del);
+    container.appendChild(wrap);
+  });
+}
+
+function selectPlate(plate) {
+  const email = document.getElementById('emailInput').value.trim();
+
+  // Open ParkZone — use window.open so we keep a reference
+  const win = window.open(PARKZONE_URL, '_blank');
+
+  if (!win) {
+    toast('Tillad pop-ups i Chrome og prøv igen');
+    return;
+  }
+
+  toast('Åbner ParkZone...');
+
+  // Poll until the child window has the field ready, then fill it
+  let attempts = 0;
+  const timer = setInterval(() => {
+    attempts++;
+    try {
+      const doc = win.document;
+      const pf = doc.getElementById('tbRegNo');
+      if (pf) {
+        clearInterval(timer);
+
+        pf.value = plate;
+        ['input', 'change', 'keyup'].forEach(ev =>
+          pf.dispatchEvent(new Event(ev, { bubbles: true }))
+        );
+
+        if (email) {
+          const ef = doc.getElementById('tbEmail')
+            || doc.querySelector('input[type=email]')
+            || doc.querySelector('input[placeholder*="mail"]')
+            || doc.querySelector('input[placeholder*="Mail"]');
+          if (ef) {
+            ef.value = email;
+            ['input', 'change'].forEach(ev =>
+              ef.dispatchEvent(new Event(ev, { bubbles: true }))
+            );
+          }
+        }
+
+        // Click Gem
+        setTimeout(() => {
+          const buttons = Array.from(doc.querySelectorAll('button, input[type=submit]'));
+          const gem = buttons.find(b => b.textContent.trim() === 'Gem' || b.value === 'Gem');
+          if (gem) gem.click();
+
+          // Click Ja
+          setTimeout(() => {
+            const btns2 = Array.from(doc.querySelectorAll('button, input[type=submit]'));
+            const ja = btns2.find(b => b.textContent.trim() === 'Ja');
+            if (ja) ja.click();
+
+            // Click OK
+            setTimeout(() => {
+              const btns3 = Array.from(doc.querySelectorAll('button, input[type=submit]'));
+              const ok = btns3.find(b => b.textContent.trim() === 'OK' || b.textContent.trim() === 'Ok');
+              if (ok) ok.click();
+            }, 800);
+          }, 800);
+        }, 500);
+      }
+    } catch(e) {
+      // Cross-origin not ready yet — keep waiting
+    }
+
+    if (attempts > 30) clearInterval(timer);
+  }, 500);
+}
+
+function addPlate() {
+  const inp = document.getElementById('newPlate');
+  const val = inp.value.trim().toUpperCase().replace(/\s/g, '');
+  if (!val || plates.includes(val)) return;
+  plates.push(val);
+  savePlates();
+  inp.value = '';
+  inp.blur();
+  render();
+}
+
+function removePlate(i) {
+  plates.splice(i, 1);
+  savePlates();
+  render();
+}
+
+document.getElementById('newPlate').addEventListener('keydown', e => { if (e.key === 'Enter') addPlate(); });
+
+const savedEmail = localStorage.getItem('pz_email');
+if (savedEmail) document.getElementById('emailInput').value = savedEmail;
+
+render();
+</script>
+</body>
+</html>
